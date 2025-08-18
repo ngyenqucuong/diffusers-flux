@@ -39,9 +39,7 @@ def initialize_pipelines():
     # vae = AutoencoderKL.from_pretrained(hf_hub_download('frankjoshua/FLUX.1-dev', 'ae.safetensors')).to(dtype=torch.float16)
 
     control_net = FluxControlNetModel.from_pretrained(
-        hf_hub_download(
-        repo_id="vuongminhkhoi4/ComfyUI_InfiniteYou", subfolder="aes_stage2_control_net", filename="aes_stage2_control.safetensors"
-    ),
+        'ByteDance/InfiniteYou', subfolder="infu_flux_v1.0/aes_stage2/InfuseNetModel"
         torch_dtype=torch.bfloat16,
     )
     transformer = FluxTransformer2DModel.from_pretrained(
