@@ -82,7 +82,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="SDXL Face Swap API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Flux Inpainting", version="1.0.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="."), name="static")
 
 # CORS middleware
