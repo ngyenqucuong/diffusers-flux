@@ -40,7 +40,7 @@ def initialize_pipelines():
 
     control_net = FluxControlNetModel.from_pretrained(
         hf_hub_download(
-        'https://huggingface.co/ByteDance/InfiniteYou/resolve/main/infu_flux_v1.0/aes_stage2/infusenet_aes_bf16.safetensors'
+        repo_id="vuongminhkhoi4/ComfyUI_InfiniteYou", subfolder="aes_stage2_control_net", filename="aes_stage2_control.safetensors"
     ),
         torch_dtype=torch.bfloat16,
     )
