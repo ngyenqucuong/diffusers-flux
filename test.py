@@ -60,7 +60,6 @@ def initialize_pipelines():
             'ByteDance/InfiniteYou', 
             subfolder="infu_flux_v1.0/aes_stage2/InfuseNetModel",
             torch_dtype=torch.float16,  # Use float16 for memory efficiency
-            device_map="auto"
         )
         
         logger.info("Loading Transformer...")
@@ -68,7 +67,6 @@ def initialize_pipelines():
             "diffusers/FLUX.1-Depth-dev-nf4", 
             subfolder="transformer", 
             torch_dtype=torch.float16,
-            device_map="auto"
         )
         
         logger.info("Loading Text Encoder...")
@@ -76,7 +74,6 @@ def initialize_pipelines():
             "diffusers/FLUX.1-Depth-dev-nf4", 
             subfolder="text_encoder_2", 
             torch_dtype=torch.float16,
-            device_map="auto"
         )
         
         # Clear cache before loading main pipeline
@@ -89,7 +86,6 @@ def initialize_pipelines():
             transformer=transformer,
             text_encoder_2=text_encoder_2,
             torch_dtype=torch.float16,
-            device_map="auto",
             low_cpu_mem_usage=True
         )
         
@@ -99,7 +95,7 @@ def initialize_pipelines():
         repo_name = "ByteDance/Hyper-SD"
         pipe.load_lora_weights(hf_hub_download(repo_name, ckpt_name))
         pipe.fuse_lora(lora_scale=0.125)
-        
+        pipe.to("cuda")
         # Enable all memory optimizations
         logger.info("Enabling memory optimizations...")
         pipe.enable_model_cpu_offload()
