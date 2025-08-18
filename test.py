@@ -43,10 +43,10 @@ def initialize_pipelines():
         torch_dtype=torch.bfloat16,
     )
     transformer = FluxTransformer2DModel.from_pretrained(
-        "sayakpaul/FLUX.1-Depth-dev-nf4", subfolder="transformer", torch_dtype=torch.bfloat16
+        "diffusers/FLUX.1-Depth-dev-nf4", subfolder="transformer", torch_dtype=torch.bfloat16
     )
     text_encoder_2 = T5EncoderModel.from_pretrained(
-        "sayakpaul/FLUX.1-Depth-dev-nf4", subfolder="text_encoder_2", torch_dtype=torch.bfloat16
+        "diffusers/FLUX.1-Depth-dev-nf4", subfolder="text_encoder_2", torch_dtype=torch.bfloat16
     )
     ckpt_name = "Hyper-FLUX.1-dev-8steps-lora.safetensors"
     repo_name = "ByteDance/Hyper-SD"
