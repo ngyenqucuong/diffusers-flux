@@ -179,7 +179,7 @@ async def gen_img2img(job_id: str, face_image : Image.Image,pose_image: Image.Im
 async def serve_web_interface():
     """Serve the web interface"""
     try:
-        with open("img2img_interface.html", "r") as f:
+        with open("interface.html", "r") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Web interface not found</h1>")
