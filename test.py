@@ -124,20 +124,14 @@ async def gen_img2img(job_id: str, face_image : Image.Image,pose_image: Image.Im
     seed = request.seed if request.seed else torch.randint(0, 2**32, (1,)).item()
     # cv2image = cv2.cvtColor(np.array(face_image), cv2.COLOR_RGB2BGR)
     prompt = "a blue robot singing opera with human-like expressions"
-    image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/robot.png")
-
-    head_mask = np.zeros_like(image)
-    head_mask[65:580, 300:642] = 255
-    mask_image = Image.fromarray(head_mask)
-
     processor = DepthPreprocessor.from_pretrained("LiheYoung/depth-anything-large-hf")
-    control_image = processor(image)[0].convert("RGB")
+    control_image = processor(pose_image)[0].convert("RGB")
 
     generated_image = pipe(
         num_samples=1,
         prompt=prompt,
         # negative_prompt=negative_prompt,
-        image=image,
+        image=pose_image,
         control_image=control_image,
         mask_image=mask_image,
         num_inference_steps=8,
