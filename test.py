@@ -93,8 +93,8 @@ def initialize_pipelines():
         logger.info("Loading LoRA weights...")
         ckpt_name = "Hyper-FLUX.1-dev-8steps-lora.safetensors"
         repo_name = "ByteDance/Hyper-SD"
-        pipe.load_lora_weights(hf_hub_download(repo_name, ckpt_name))
-        pipe.fuse_lora(lora_scale=0.125)
+        pipe.load_lora_weights("black-forest-labs/FLUX.1-Depth-dev-lora", adapter_name="depth")
+        pipe.set_adapters("depth", 0.85)
         pipe.to("cuda")
         # Enable all memory optimizations
         logger.info("Enabling memory optimizations...")
