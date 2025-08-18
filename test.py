@@ -35,9 +35,9 @@ os.makedirs(results_dir, exist_ok=True)
 def initialize_pipelines():
     """Initialize the diffusion pipelines with InstantID and SDXL-Lightning - GPU optimized"""
     global pipe
-    
-    vae_model_path = hf_hub_download('https://huggingface.co/frankjoshua/FLUX.1-dev/resolve/main/ae.safetensors')
-    vae =  AutoencoderKL.from_pretrained(vae_model_path).to(dtype=torch.float16)
+
+    vae_model_path = 'https://huggingface.co/frankjoshua/FLUX.1-dev/resolve/main/ae.safetensors'
+    vae =  AutoencoderKL.from_single_file(vae_model_path)
     control_net = FluxControlNetModel.from_pretrained(
         hf_hub_download(
         repo_id="vuongminhkhoi4/ComfyUI_InfiniteYou", subfolder="aes_stage2_control_net", filename="aes_stage2_control.safetensors"
