@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDXL Face Swap Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #4299e1;
+            background-color: rgba(66, 153, 225, 0.1);
+        }
+        .upload-area.dragover {
+            border-color: #3182ce;
+            background-color: rgba(49, 130, 206, 0.2);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #4299e1, #3182ce);
+            border-radius: 10px;
+            height: 8px;
+            transition: width 0.3s ease;
+        }
+        .result-card {
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.5s ease forwards;
+        }
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4299e1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="glass p-6 mb-6">
+            <h1 class="text-4xl font-bold text-white text-center mb-2">
+                🎭 SDXL Face Swap Studio
+            </h1>
+            <p class="text-white text-center opacity-80">
+                Generate images with AI and swap faces using InstantID technology
+            </p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Panel - Controls -->
+            <div class="glass p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Image to Image</h3>
+                
+                <!-- File Upload -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-white font-medium mb-2">Base Image</label>
+                        <div class="upload-area p-6 text-center cursor-pointer" onclick="document.getElementById('baseImage').click()">
+                            <input type="file" id="baseImage" accept="image/*" class="hidden">
+                            <div id="baseImagePreview" class="hidden">
+                                <img id="baseImageImg" class="max-w-full h-32 object-cover rounded-lg mx-auto">
+                            </div>
+                            <div id="baseImagePlaceholder">
+                                <p class="text-white">📷 Click to upload base image</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Pose Image</label>
+                        <div class="upload-area p-6 text-center cursor-pointer" onclick="document.getElementById('poseImage').click()">
+                            <input type="file" id="poseImage" accept="image/*" class="hidden">
+                            <div id="poseImagePreview" class="hidden">
+                                <img id="poseImageImg" class="max-w-full h-32 object-cover rounded-lg mx-auto">
+                            </div>
+                            <div id="poseImagePlaceholder">
+                                <p class="text-white">📷 Click to upload pose image</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Mask Image</label>
+                        <div class="upload-area p-6 text-center cursor-pointer" onclick="document.getElementById('maskImage').click()">
+                            <input type="file" id="maskImage" accept="image/*" class="hidden">
+                            <div id="maskImagePreview" class="hidden">
+                                <img id="maskImageImg" class="max-w-full h-32 object-cover rounded-lg mx-auto">
+                            </div>
+                            <div id="maskImagePlaceholder">
+                                <p class="text-white">📷 Click to upload mask image</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompt -->
+                <div class="mt-4">
+                    <label class="block text-white font-medium mb-2">Prompt</label>
+                    <textarea id="Prompt" 
+                            class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 border border-gray-300 border-opacity-30"
+                            rows="2" 
+                            placeholder="natural head with hair, detailed hairstyle, photorealistic portrait"></textarea>
+                </div>
+
+                <!-- Parameters -->
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-white font-medium mb-2">IP Adapter Scale</label>
+                        <input type="range" id="adapterScale" min="0" max="1" step="0.1" value="0.8" 
+                               class="w-full" oninput="document.getElementById('adapterScaleValue').textContent = this.value">
+                        <span id="adapterScaleValue" class="text-white text-sm">0.8</span>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Strength</label>
+                        <input type="range" id="Strength" min="0" max="1" step="0.1" value="0.85" 
+                               class="w-full" oninput="document.getElementById('StrengthValue').textContent = this.value">
+                        <span id="StrengthValue" class="text-white text-sm">0.85</span>
+                    </div>
+                </div>
+
+                <!-- Additional Parameters -->
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-white font-medium mb-2">ControlNet Scale</label>
+                        <input type="range" id="controlnetScale" min="0" max="1" step="0.1" value="0.8" 
+                               class="w-full" oninput="document.getElementById('controlnetScaleValue').textContent = this.value">
+                        <span id="controlnetScaleValue" class="text-white text-sm">0.8</span>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Guidance Scale</label>
+                        <input type="range" id="guidanceScale" min="0" max="10" step="0.5" value="0" 
+                               class="w-full" oninput="document.getElementById('guidanceScaleValue').textContent = this.value">
+                        <span id="guidanceScaleValue" class="text-white text-sm">0</span>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Num Step</label>
+                        <input type="range" id="numStep" min="0" max="50" step="1" value="50" 
+                               class="w-full" oninput="document.getElementById('numStepValue').textContent = this.value">
+                        <span id="numStepValue" class="text-white text-sm">50</span>
+                    </div>
+                </div>
+                <!-- Additional Parameters -->
+                <div class="mt-4">
+                    <label class="block text-white font-medium mb-2">Detail Face</label>
+                    <input type="checkbox" id="detailFace" class="mr-2 leading-tight">
+                    <label for="detailFace" class="text-white">Refine face details</label>
+                </div>
+
+                <!-- Seed -->
+                <div class="mt-4">
+                    <label class="block text-white font-medium mb-2">Seed (0 for random)</label>
+                    <input type="number" id="generateSeed" 
+                           class="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 border border-gray-300 border-opacity-30" 
+                           value="0" placeholder="Random seed (0 for random)">
+                </div>
+
+                <!-- Generate Button -->
+                <button id="generateBtn" 
+                        class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                    🔄 Generate Image
+                </button>
+
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-6 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-white font-medium">Processing...</span>
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div class="w-full bg-gray-200 bg-opacity-30 rounded-full h-2">
+                        <div id="progressBar" class="progress-bar w-0"></div>
+                    </div>
+                    <div id="progressText" class="text-white text-sm mt-2">Starting...</div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Results -->
+            <div class="glass p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Results</h3>
+                
+                <div id="resultsContainer" class="space-y-4">
+                    <div id="noResults" class="text-center text-white opacity-60 py-12">
+                        <div class="text-6xl mb-4">🎨</div>
+                        <p>Your generated images will appear here</p>
+                    </div>
+                </div>
+
+                <!-- Job History -->
+                <div class="mt-8">
+                    <h4 class="text-lg font-semibold text-white mb-4">Recent Jobs</h4>
+                    <div id="jobHistory" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- Jobs will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        // Global state
+        let currentJobs = new Set();
+        
+        // Setup file input for base image
+        const baseInput = document.getElementById('baseImage');
+        const basePreview = document.getElementById('baseImagePreview');
+        const basePlaceholder = document.getElementById('baseImagePlaceholder');
+        const baseImg = document.getElementById('baseImageImg');
+        const poseInput = document.getElementById('poseImage');
+        const posePreview = document.getElementById('poseImagePreview');
+        const posePlaceholder = document.getElementById('poseImagePlaceholder');
+        const poseImg = document.getElementById('poseImageImg');
+        const maskInput = document.getElementById('maskImage');
+        const maskPreview = document.getElementById('maskImagePreview');
+
+        const maskPlaceholder = document.getElementById('maskImagePlaceholder');
+        const maskImg = document.getElementById('maskImageImg');
+
+        baseInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    baseImg.src = e.target.result;
+                    basePreview.classList.remove('hidden');
+                    basePlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        poseInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    poseImg.src = e.target.result;
+                    posePreview.classList.remove('hidden');
+                    posePlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        maskInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    maskImg.src = e.target.result;
+                    maskPreview.classList.remove('hidden');
+                    maskPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Generate button event listener
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const baseImageFile = document.getElementById('baseImage').files[0];
+            const poseImageFile = document.getElementById('poseImage').files[0];
+            const maskImageFile = document.getElementById('maskImage').files[0];
+            const prompt = document.getElementById('Prompt').value;
+            
+            if (!baseImageFile) {
+                alert('Please upload a base image');
+                return;
+            }
+
+            if (!poseImageFile) {
+                alert('Please upload a pose image');
+                return;
+            }
+            if (!maskImageFile) {
+                alert('Please upload a mask image');
+                return;
+            }
+            if (!prompt.trim()) {
+                alert('Please enter a prompt');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('base_image', baseImageFile);
+            formData.append('pose_image', poseImageFile);
+            formData.append('mask_image', maskImageFile);
+            formData.append('prompt', prompt);
+            formData.append('ip_adapter_scale', document.getElementById('adapterScale').value);
+            formData.append('strength', document.getElementById('Strength').value);
+            formData.append('num_inference_steps', document.getElementById('numStep').value);
+            formData.append('controlnet_conditioning_scale', document.getElementById('controlnetScale').value);
+            formData.append('guidance_scale', document.getElementById('guidanceScale').value);
+            formData.append('detail_face', document.getElementById('detailFace').checked);
+
+            const seedValue = document.getElementById('generateSeed').value;
+            if (seedValue && seedValue !== '0') {
+                formData.append('seed', seedValue);
+            }
+            
+            try {
+                const response = await fetch(`/img2img`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    startJobPolling(result.job_id);
+                } else {
+                    throw new Error(result.detail || 'Generation failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+        
+        // Job polling function
+        function startJobPolling(jobId) {
+            currentJobs.add(jobId);
+            document.getElementById('progressSection').classList.remove('hidden');
+            document.getElementById('noResults').classList.add('hidden');
+            
+            const poll = async () => {
+                try {
+                    const response = await fetch(`/job/${jobId}`);
+                    const job = await response.json();
+                    
+                    updateProgressBar(job.progress * 100);
+                    document.getElementById('progressText').textContent = job.status;
+                    
+                    if (job.status === 'completed') {
+                        currentJobs.delete(jobId);
+                        document.getElementById('progressSection').classList.add('hidden');
+                        addResult(job.result_url, jobId, job.seed || 'N/A');
+                        updateJobHistory();
+                    } else if (job.status === 'failed') {
+                        currentJobs.delete(jobId);
+                        document.getElementById('progressSection').classList.add('hidden');
+                        alert('Job failed: ' + (job.error_message || 'Unknown error'));
+                        updateJobHistory();
+                    } else {
+                        setTimeout(poll, 1000);
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                    setTimeout(poll, 2000);
+                }
+            };
+            
+            poll();
+        }
+        
+        function updateProgressBar(progress) {
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function addResult(imageUrl, jobId, seedValue) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card bg-white bg-opacity-10 rounded-lg p-4';
+            resultCard.innerHTML = `
+                <img src="${imageUrl}" alt="Generated Image" class="w-full rounded-lg mb-3">
+                <div class="text-white text-sm mb-2">Seed: ${seedValue}</div>
+                <div class="flex space-x-2">
+                    <button onclick="downloadImage('${imageUrl}', 'result_${jobId}.png')" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm">
+                        📥 Download
+                    </button>
+                    <button onclick="useAsBase('${imageUrl}')" 
+                            class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm">
+                        🔄 Use as Base
+                    </button>
+                </div>
+            `;
+            
+            resultsContainer.appendChild(resultCard);
+        }
+        
+        function downloadImage(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function useAsBase(imageUrl) {
+            // Convert the result image to be used as base image
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], 'base_image.png', { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    
+                    document.getElementById('baseImage').files = dataTransfer.files;
+                    document.getElementById('baseImage').dispatchEvent(new Event('change'));
+                })
+                .catch(error => {
+                    console.error('Error using image as base:', error);
+                    alert('Failed to use image as base');
+                });
+        }
+        
+        async function updateJobHistory() {
+            try {
+                const response = await fetch(`/jobs`);
+                const data = await response.json();
+                
+                const jobHistory = document.getElementById('jobHistory');
+                jobHistory.innerHTML = '';
+                
+                let jobs = [];
+                if (Array.isArray(data)) {
+                    jobs = data;
+                } else if (data.jobs && Array.isArray(data.jobs)) {
+                    jobs = data.jobs;
+                } else if (typeof data === 'object') {
+                    jobs = Object.values(data);
+                }
+                
+                if (jobs.length === 0) {
+                    jobHistory.innerHTML = '<div class="text-white text-center opacity-60">No jobs yet</div>';
+                    return;
+                }
+                
+                jobs.forEach(job => {
+                    const jobElement = document.createElement('div');
+                    jobElement.className = 'bg-white bg-opacity-10 rounded-lg p-3';
+                    
+                    const jobId = job.job_id || job.id || 'Unknown';
+                    const status = job.status || 'Unknown';
+                    const createdAt = job.created_at || job.timestamp || new Date().toISOString();
+                    
+                    jobElement.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-white font-medium">${jobId.toString().substr(0, 8)}...</div>
+                                <div class="text-white text-sm opacity-60">${status}</div>
+                            </div>
+                            <div class="text-white text-sm">
+                                ${new Date(createdAt).toLocaleTimeString()}
+                            </div>
+                        </div>
+                    `;
+                    jobHistory.appendChild(jobElement);
+                });
+            } catch (error) {
+                console.error('Failed to update job history:', error);
+                const jobHistory = document.getElementById('jobHistory');
+                jobHistory.innerHTML = '<div class="text-white text-center opacity-60">Failed to load job history</div>';
+            }
+        }
+        
+        // Initialize
+        updateJobHistory();
+        
+        // Check API health on load
+        fetch(`/health`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.pipelines_loaded) {
+                    alert('Warning: AI models are still loading. Please wait a moment before generating images.');
+                }
+            })
+            .catch(error => {
+                alert('Cannot connect to API server. Please make sure the backend is running on http://localhost:8000');
+            });
+    </script>
+</body>
+</html>
