@@ -36,7 +36,7 @@ def initialize_pipelines():
     """Initialize the diffusion pipelines with InstantID and SDXL-Lightning - GPU optimized"""
     global pipe
 
-    vae = AutoencoderKL.from_pretrained(hf_hub_download('frankjoshua/FLUX.1-dev', 'ae.safetensors')).to(dtype=torch.float16)
+    # vae = AutoencoderKL.from_pretrained(hf_hub_download('frankjoshua/FLUX.1-dev', 'ae.safetensors')).to(dtype=torch.float16)
 
     control_net = FluxControlNetModel.from_pretrained(
         hf_hub_download(
@@ -55,7 +55,7 @@ def initialize_pipelines():
 
     pipe = FluxControlInpaintPipeline.from_pretrained(
         "black-forest-labs/FLUX.1-Depth-dev",
-        vae=vae,
+        # vae=vae,
         control_net=control_net,
         torch_dtype=torch.bfloat16,
     )
