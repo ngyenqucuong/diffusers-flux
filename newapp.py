@@ -183,7 +183,6 @@ def create_image(input_image,
         subject_image=input_image,
         subject_scale=scale,
         generator=torch.manual_seed(seed),
-        num_samples=1
     ).images
 
     
