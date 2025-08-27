@@ -12,3 +12,4 @@ diffusers==0.34.0
 timm
 protobuf
 sentencepiece
+kornia
