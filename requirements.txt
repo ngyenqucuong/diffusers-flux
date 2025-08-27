@@ -5,7 +5,7 @@ transformers==4.48.3
 uvicorn==0.35.0
 torchvision==0.22.1
 xformers==0.0.31.post1
-epinos
+einops
 peft==0.16.0
 fastapi==0.116.1
 diffusers==0.34.0
