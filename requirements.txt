@@ -9,3 +9,6 @@ einops
 peft==0.16.0
 fastapi==0.116.1
 diffusers==0.34.0
+timm
+protobuf
+sentencepiece
