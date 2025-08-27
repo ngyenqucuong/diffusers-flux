@@ -234,7 +234,7 @@ class JobStatus(BaseModel):
 
 
 
-async def gen_img2img(job_id: str, face_image : Image.Image,pose_image: Image.Image,request: Img2ImgRequest):
+async def gen_img2img(job_id: str, face_image : Image.Image,request: Img2ImgRequest):
     
     seed = request.seed if request.seed else  random.randint(0, np.iinfo(np.int32).max)
     image = create_image(face_image,
@@ -368,7 +368,7 @@ async def img2img(
         # Start background task
         loop = asyncio.get_event_loop()
         loop.run_in_executor(executor, lambda: asyncio.run(
-            gen_img2img(job_id, base_img, pose_img, request)
+            gen_img2img(job_id, base_img, request)
         ))
         
         return {"job_id": job_id, "status": "pending"}
