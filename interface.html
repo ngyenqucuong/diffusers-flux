@@ -92,30 +92,7 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-white font-medium mb-2">Pose Image</label>
-                        <div class="upload-area p-6 text-center cursor-pointer" onclick="document.getElementById('poseImage').click()">
-                            <input type="file" id="poseImage" accept="image/*" class="hidden">
-                            <div id="poseImagePreview" class="hidden">
-                                <img id="poseImageImg" class="max-w-full h-32 object-cover rounded-lg mx-auto">
-                            </div>
-                            <div id="poseImagePlaceholder">
-                                <p class="text-white">📷 Click to upload pose image</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-white font-medium mb-2">Mask Image</label>
-                        <div class="upload-area p-6 text-center cursor-pointer" onclick="document.getElementById('maskImage').click()">
-                            <input type="file" id="maskImage" accept="image/*" class="hidden">
-                            <div id="maskImagePreview" class="hidden">
-                                <img id="maskImageImg" class="max-w-full h-32 object-cover rounded-lg mx-auto">
-                            </div>
-                            <div id="maskImagePlaceholder">
-                                <p class="text-white">📷 Click to upload mask image</p>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <!-- Prompt -->
@@ -141,6 +118,18 @@
                                class="w-full" oninput="document.getElementById('StrengthValue').textContent = this.value">
                         <span id="StrengthValue" class="text-white text-sm">0.85</span>
                     </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Width</label>
+                        <input type="range" id="Width" min="512" max="1024" step="16" value="768" 
+                               class="w-full" oninput="document.getElementById('WidthValue').textContent = this.value">
+                        <span id="WidthValue" class="text-white text-sm">768</span>
+                    </div>
+                    <div>
+                        <label class="block text-white font-medium mb-2">Height</label>
+                        <input type="range" id="Height" min="512" max="1024" step="16" value="1024" 
+                               class="w-full" oninput="document.getElementById('HeightValue').textContent = this.value">
+                        <span id="HeightValue" class="text-white text-sm">1024</span>
+                    </div>
                 </div>
 
                 <!-- Additional Parameters -->
@@ -159,17 +148,12 @@
                     </div>
                     <div>
                         <label class="block text-white font-medium mb-2">Num Step</label>
-                        <input type="range" id="numStep" min="0" max="50" step="1" value="50" 
+                        <input type="range" id="numStep" min="0" max="50" step="1" value="25" 
                                class="w-full" oninput="document.getElementById('numStepValue').textContent = this.value">
-                        <span id="numStepValue" class="text-white text-sm">50</span>
+                        <span id="numStepValue" class="text-white text-sm">25</span>
                     </div>
                 </div>
                 <!-- Additional Parameters -->
-                <div class="mt-4">
-                    <label class="block text-white font-medium mb-2">Detail Face</label>
-                    <input type="checkbox" id="detailFace" class="mr-2 leading-tight">
-                    <label for="detailFace" class="text-white">Refine face details</label>
-                </div>
 
                 <!-- Seed -->
                 <div class="mt-4">
@@ -230,16 +214,7 @@
         const basePreview = document.getElementById('baseImagePreview');
         const basePlaceholder = document.getElementById('baseImagePlaceholder');
         const baseImg = document.getElementById('baseImageImg');
-        const poseInput = document.getElementById('poseImage');
-        const posePreview = document.getElementById('poseImagePreview');
-        const posePlaceholder = document.getElementById('poseImagePlaceholder');
-        const poseImg = document.getElementById('poseImageImg');
-        const maskInput = document.getElementById('maskImage');
-        const maskPreview = document.getElementById('maskImagePreview');
-
-        const maskPlaceholder = document.getElementById('maskImagePlaceholder');
-        const maskImg = document.getElementById('maskImageImg');
-
+        
         baseInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -252,49 +227,16 @@
                 reader.readAsDataURL(file);
             }
         });
-        poseInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    poseImg.src = e.target.result;
-                    posePreview.classList.remove('hidden');
-                    posePlaceholder.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        maskInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    maskImg.src = e.target.result;
-                    maskPreview.classList.remove('hidden');
-                    maskPlaceholder.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        
         
         // Generate button event listener
         document.getElementById('generateBtn').addEventListener('click', async () => {
             const baseImageFile = document.getElementById('baseImage').files[0];
-            const poseImageFile = document.getElementById('poseImage').files[0];
-            const maskImageFile = document.getElementById('maskImage').files[0];
+            
             const prompt = document.getElementById('Prompt').value;
             
             if (!baseImageFile) {
                 alert('Please upload a base image');
-                return;
-            }
-
-            if (!poseImageFile) {
-                alert('Please upload a pose image');
-                return;
-            }
-            if (!maskImageFile) {
-                alert('Please upload a mask image');
                 return;
             }
             if (!prompt.trim()) {
@@ -304,8 +246,6 @@
             
             const formData = new FormData();
             formData.append('base_image', baseImageFile);
-            formData.append('pose_image', poseImageFile);
-            formData.append('mask_image', maskImageFile);
             formData.append('prompt', prompt);
             formData.append('ip_adapter_scale', document.getElementById('adapterScale').value);
             formData.append('strength', document.getElementById('Strength').value);
@@ -313,6 +253,8 @@
             formData.append('controlnet_conditioning_scale', document.getElementById('controlnetScale').value);
             formData.append('guidance_scale', document.getElementById('guidanceScale').value);
             formData.append('detail_face', document.getElementById('detailFace').checked);
+            formData.append('width', document.getElementById('Width').value);
+            formData.append('height', document.getElementById('Height').value);
 
             const seedValue = document.getElementById('generateSeed').value;
             if (seedValue && seedValue !== '0') {
